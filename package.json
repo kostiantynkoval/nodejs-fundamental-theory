@@ -1,0 +1,16 @@
+{
+  "name": "nodejs-fundamental-theory",
+  "version": "1.0.0",
+  "description": "Learning NodeJs fundamental theory",
+  "main": "index.js",
+  "repository": "git@github.com:kostiantynkoval/nodejs-fundamental-theory.git",
+  "author": "Kostiantyn Koval <Kostiantyn_Koval@epam.com>",
+  "license": "MIT",
+  "scripts": {
+    "reverse": "nodemon homework1/task1.1.js"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "nodemon": "^2.0.4"
+  }
+}
