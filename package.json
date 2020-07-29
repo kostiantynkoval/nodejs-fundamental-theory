@@ -7,10 +7,21 @@
   "author": "Kostiantyn Koval <Kostiantyn_Koval@epam.com>",
   "license": "MIT",
   "scripts": {
-    "reverse": "nodemon homework1/task1.1.js"
+    "reverse": "nodemon homework1/task1.1.js",
+    "convert": "nodemon homework1/task1.2.js",
+    "transpile": "npx babel homework1/task1.3.js --out-file homework1/task1.3_babelefied.js",
+    "babelefied": "nodemon homework1/task1.3_babelefied.js"
   },
-  "dependencies": {},
+  "dependencies": {
+    "csvtojson": "^2.0.10"
+  },
   "devDependencies": {
+    "@babel/cli": "^7.10.5",
+    "@babel/core": "^7.10.5",
+    "@babel/preset-env": "^7.10.4",
     "nodemon": "^2.0.4"
+  },
+  "babel": {
+    "presets": ["@babel/env"]
   }
 }
