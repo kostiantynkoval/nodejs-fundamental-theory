@@ -1,5 +1,4 @@
 const readline = require('readline');
-// import readline from "readline";
 
 const rl = readline.createInterface({
     input: process.stdin,
@@ -7,8 +6,7 @@ const rl = readline.createInterface({
 
 rl.on('line', input => {
     if(input.length > 0) {
-        const tupni = input.split('').reverse().join('');
-        console.log(tupni)
-        console.log()
+        const reversedInput = input.split('').reverse().join('');
+        console.log(reversedInput, "\n");
     }
 });
