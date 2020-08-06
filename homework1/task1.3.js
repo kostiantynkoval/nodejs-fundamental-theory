@@ -37,3 +37,12 @@ fs.readFile(csvFilePath, (error, file) => {
         console.log("!@#$ Babelefied Error reading file: ", error)
     }
 })
+
+
+// Using Stream
+const readStream=fs.createReadStream(csvFilePath);
+const writeStream=fs.createWriteStream(`${__dirname}/result_stream_task1_2.txt`);
+readStream.pipe(csvToJson({
+    ignoreColumns: /Amount/,
+    headers: ["book", "author", "price"]
+})).pipe(writeStream);
