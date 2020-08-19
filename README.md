@@ -6,3 +6,5 @@
 #### Transpiling
 Before run task 1.3 please transpile ES6 to ES5 by running `npm run transpile`.
 After transpiling is finished task 1.3 could be start by entering `npm run babelefied`
+## Homework2
+#### To run app please use this command `nodemon src/homework2/index.ts`
