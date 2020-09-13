@@ -7,7 +7,9 @@
   "author": "Kostiantyn Koval <Kostiantyn_Koval@epam.com>",
   "license": "MIT",
   "scripts": {
-    "start": "nodemon homework2/task2.1.ts",
+    "start:dev": "nodemon src/homework2/index.ts",
+    "start:build": "node build/homework2/index.js",
+    "build": "npx babel src/homework2 --out-dir build/homework2 --extensions '.ts,.js'",
     "reverse": "nodemon homework1/task1.1.js",
     "convert": "nodemon homework1/task1.2.js",
     "transpile": "npx babel homework1/task1.3.js --out-file homework1/task1.3_babelefied.js",
