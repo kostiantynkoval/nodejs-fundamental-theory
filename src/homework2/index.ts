@@ -1,15 +1,19 @@
 import express from 'express';
-import { dbConfig } from "./data-access/db";
-const userRouter = require('./routers/user.router');
+import { sequelize } from "./data-access/db";
 
+const userRouter = require('./routers/user.router');
 const app: express.Application = express();
 
-dbConfig
+sequelize
     .authenticate()
-    .then(() => {
-        app.listen(3000, () => {
-            console.log('App is listening on port 3000! And DB is connected');
-        })
+    .then(async () => {
+        try {
+            app.listen(3000, () => {
+                console.log('App is listening on port 3000! And DB is connected');
+            })
+        } catch ( e ) {
+            console.log("Error@@@", e);
+        }
     })
     .catch(e => console.log("Error: ", e));
 

@@ -1,7 +1,6 @@
-import * as sequelize from 'sequelize';
-import { UserFactory } from "../models/user-model";
+import { Sequelize } from "sequelize";
 
-export const dbConfig = new sequelize.Sequelize(
+export const sequelize = new Sequelize(
     "deq58cmdf0d86v",
     "djkmhhnuvliiuu",
     "441fb6e100db768c59f873967963e3d056fc0bb9a5fe41b219d9fb32b06c021b",
@@ -12,7 +11,7 @@ export const dbConfig = new sequelize.Sequelize(
         dialectOptions: {
             ssl: {
                 require: true,
-                rejectUnauthorized: false
+                rejectUnauthorized: false,
             },
         },
         ssl: true,
@@ -22,8 +21,6 @@ export const dbConfig = new sequelize.Sequelize(
             acquire: 30000,
             idle: 10000,
         },
+        logging: console.log,
     }
 );
-
-// THIS ONES ARE THE ONES YOU NEED TO USE ON YOUR CONTROLLERS
-export const User = UserFactory(dbConfig)

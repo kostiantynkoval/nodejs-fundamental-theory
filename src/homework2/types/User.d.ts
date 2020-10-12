@@ -1,7 +1,6 @@
 import { BuildOptions, Model } from "sequelize";
-import { v4String } from "uuid/interfaces";
 export interface UserAttributes {
-    id: v4String;
+    id: string;
     login: string;
     password: string;
     age: number;

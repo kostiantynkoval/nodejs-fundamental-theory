@@ -1,37 +1,64 @@
 import express from "express";
-import { users } from "../users";
+import { User } from "../models/user-model";
+import { Op } from "sequelize";
 import { userSchema } from "../services/validation/User";
 import { v4 as uuidv4 } from "uuid";
-import { User } from "../User";
 
 const userRouter: express.Router = express.Router();
 
 // Check if users array has duplicated login
-const checkIfExistingLogin = (login: string, userList: User[]) => userList.map(user => user.login).includes(login);
+const checkIfExistingLogin = (login: string, userList: any) => userList.map((user:any) => user.login).includes(login);
 
 // Get all not deleted users
-userRouter.get('/', ( req, res) => {
-    // Filter users by string, sort, and return limited items
-    if (!!req.query.search && !!req.query.limit) {
-        const limit = parseInt(req.query.limit.toString(), 10) || 0;
-        const regExp = new RegExp(`^${ req.query.search }`);
-        const transformed = users.filter(user => regExp.test(user.login)).sort((a, b) => {
-            if (a.login > b.login) return 1;
-            if (a.login < b.login) return -1;
-            return 0;
-        }).slice(0, limit);
-        res.json(transformed);
-        // Show all users with deleted ones if there is query: showDeleted=true
-    } else if (req.query.showDeleted === 'true') {
-        res.json(users);
-    } else {
-        res.json(users.filter(user => !user.isDeleted));
+userRouter.get('/', async ( req, res) => {
+    try {
+        // Filter users by string, sort, and return limited items
+        if (!!req.query.search || !!req.query.limit) {
+            const users = await User.findAll({
+                ...req.query.search && {
+                    where: {
+                        [Op.and]: {
+                            login: {
+                                [Op.regexp]: `^${req.query.search}`,
+                            },
+                            isDeleted: false,
+                        }
+                    }
+                },
+                order: [
+                    ["login", "ASC"],
+                ],
+                ...req.query.limit && { limit: +req.query.limit },
+            });
+            res.json(users);
+            // Show all users with deleted ones if there is query: showDeleted=true
+        } else if (req.query.showDeleted === 'true') {
+            const users: any[] = await User.findAll({
+                order: [
+                    ["login", "DESC"],
+                ],
+            });
+            res.json(users);
+        } else {
+            const users = await User.findAll({
+                order: [
+                    ["login", "DESC"],
+                ],
+                where: {
+                    isDeleted: false,
+                }
+            });
+            res.json(users);
+        }
+    } catch ( e ) {
+        console.log("Error during fetching users", e);
     }
 });
 
 // Create new user
-userRouter.post('/create', (req, res) => {
+userRouter.post('/create', async (req, res) => {
     const { error, value } = userSchema.validate(req.body);
+    const users = await User.findAll();
     // Body validation
     if (!error) {
         const { login, password, age } = value;
@@ -39,7 +66,7 @@ userRouter.post('/create', (req, res) => {
         if (checkIfExistingLogin(login, users)) {
             res.status(400).json({ message: 'User already exists' });
         } else {
-            users.push({
+            await User.create({
                 id: uuidv4(),
                 login,
                 password,
@@ -56,55 +83,51 @@ userRouter.post('/create', (req, res) => {
 userRouter
 .route('/:id')
 // Get item by id
-.get((req, res) => {
-    const foundedUser = users.find(user => user.id === req.params.id && !user.isDeleted);
-    if (!foundedUser) {
+.get(async (req, res) => {
+    const user = await User.findOne({ where:{
+            id: req.params.id
+        } });
+    // const foundedUser = users.find(user => user.id === req.params.id && !user.isDeleted);
+    if (!user) {
         res.status(404).json({ message: 'User is not found' });
     } else {
-        res.json(foundedUser);
+        res.json(user);
     }
 })
 // Update item by id
-.put((req, res) => {
+.put(async (req, res) => {
     const { error, value } = userSchema.validate(req.body);
-    // Body validation
     if (!error) {
-        const { login, password, age } = value;
-        const index = users.findIndex(user => user.id === req.params.id);
-        if (index > -1) {
-            // Check if users array has duplicated login (except same user)
-            if (users[index].login !== login && checkIfExistingLogin(login, users)) {
-                res.status(400).json({ message: 'This login is taken already' });
+        try {
+            await User.update(value, {
+                where: {
+                    id: req.params.id
+                }
+            });
+            res.json({ message: `User: ${ value.login } is updated successfully` });
+        } catch ( e ) {
+            if (e.original.code === "23505") {
+                return res.status(400).json({ error: { message: "Bad request: " + e.errors[0].message } } );
             } else {
-                const updated = {
-                    id: req.params.id,
-                    login,
-                    password,
-                    age,
-                    isDeleted: users[index].isDeleted
-                };
-                users.splice(index, 1, updated);
-                res.json({ message: `User ${ updated.login } is updated successfully` });
+                return res.status(500).json({ error: e });
             }
-        } else {
-            res.status(404).json({ message: 'User is not found' });
         }
     } else {
-        res.status(400).json({ error: error.details });
+        res.status(400).json({ error });
     }
 })
 // Delete item by id
-.delete((req, res) => {
-    const index = users.findIndex(user => user.id === req.params.id);
-    if (index > -1) {
-        if (users[index].isDeleted) {
-            res.status(400).json({ message: `User ${ users[index].login } is already deleted` });
-        } else {
-            users[index].isDeleted = true;
-            res.json({ message: `User ${ users[index].login } is deleted successfully` });
-        }
-    } else {
-        res.status(404).json({ message: 'User is not found' });
+.delete(async (req, res) => {
+    try {
+        const user = await User.update({ isDeleted: true }, {
+            where: {
+                id: req.params.id
+            }
+        });
+        console.log('deleted user', user)
+        res.json({ message: 'User is deleted successfully' });
+    } catch ( e ) {
+        res.status(400).json({ error: e });
     }
 });
 
