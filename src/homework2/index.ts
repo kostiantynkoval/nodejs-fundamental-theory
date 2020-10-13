@@ -1,7 +1,10 @@
 import express from 'express';
 import { sequelize } from "./data-access/db";
+import { Group } from "./models/group.model";
 
 const userRouter = require('./routers/user.router');
+const groupRouter = require('./routers/group.router');
+
 const app: express.Application = express();
 
 sequelize
@@ -19,5 +22,7 @@ sequelize
 
 app.use(express.json());
 app.use('/api/users', userRouter);
+app.use('/api/groups', groupRouter);
 
-
+// To create a table
+// await Group.sync({ force: true })

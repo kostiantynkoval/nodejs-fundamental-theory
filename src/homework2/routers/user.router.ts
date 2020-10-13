@@ -1,5 +1,5 @@
 import express from "express";
-import { User } from "../models/user-model";
+import { User } from "../models/user.model";
 import { Op } from "sequelize";
 import { userSchema } from "../services/validation/User";
 import { v4 as uuidv4 } from "uuid";
@@ -50,8 +50,8 @@ userRouter.get('/', async ( req, res) => {
             });
             res.json(users);
         }
-    } catch ( e ) {
-        console.log("Error during fetching users", e);
+    } catch ( error ) {
+        console.log("Error during fetching users", error);
     }
 });
 
@@ -63,17 +63,23 @@ userRouter.post('/create', async (req, res) => {
     if (!error) {
         const { login, password, age } = value;
         // Check if users array has duplicated login
+        // FIXME: Check whether this functionality is needed here
         if (checkIfExistingLogin(login, users)) {
             res.status(400).json({ message: 'User already exists' });
         } else {
-            await User.create({
-                id: uuidv4(),
-                login,
-                password,
-                age,
-                isDeleted: false
-            });
-            res.json({ message: 'User created successfully' });
+            try {
+                await User.create({
+                    id: uuidv4(),
+                    login,
+                    password,
+                    age,
+                    isDeleted: false
+                });
+                res.json({ message: 'User created successfully' });
+            } catch ( e ) {
+                console.log("Error during creating a user: ", error)
+                res.status(500).json({ error: e });
+            }
         }
     } else {
         res.status(400).json({ error });
@@ -84,14 +90,18 @@ userRouter
 .route('/:id')
 // Get item by id
 .get(async (req, res) => {
-    const user = await User.findOne({ where:{
-            id: req.params.id
-        } });
-    // const foundedUser = users.find(user => user.id === req.params.id && !user.isDeleted);
-    if (!user) {
-        res.status(404).json({ message: 'User is not found' });
-    } else {
-        res.json(user);
+    try {
+        const user = await User.findOne({ where:{
+                id: req.params.id
+            } });
+        if (!user) {
+            res.status(404).json({ message: 'User is not found' });
+        } else {
+            res.json(user);
+        }
+    } catch ( error ) {
+        console.log("Error during fetching a user: ", error)
+        res.status(500).json({ error });
     }
 })
 // Update item by id
@@ -119,15 +129,14 @@ userRouter
 // Delete item by id
 .delete(async (req, res) => {
     try {
-        const user = await User.update({ isDeleted: true }, {
+        await User.update({ isDeleted: true }, {
             where: {
                 id: req.params.id
             }
         });
-        console.log('deleted user', user)
         res.json({ message: 'User is deleted successfully' });
     } catch ( e ) {
-        res.status(400).json({ error: e });
+        res.status(500).json({ error: e });
     }
 });
 

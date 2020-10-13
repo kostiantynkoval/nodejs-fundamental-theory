@@ -1,15 +1,18 @@
 import Joi from '@hapi/joi';
 
 export const userSchema = Joi.object({
-    login: Joi.string()
+    login: Joi
+        .string()
         .alphanum()
         .required(),
 
-    password: Joi.string()
+    password: Joi
+        .string()
         .pattern(new RegExp('^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{2,}$'))
         .required(),
 
-    age: Joi.number()
+    age: Joi
+        .number()
         .required()
         .integer()
         .min(4)
