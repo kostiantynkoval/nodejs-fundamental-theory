@@ -1,6 +1,8 @@
-import { HasManyAddAssociationsMixin, Model, Optional } from "sequelize";
-import { User } from "../models/user.model";
-import { Permission } from "../models/group.model";
+/* eslint-disable no-unused-vars */
+import { HasManyAddAssociationsMixin, Model, Optional } from 'sequelize';
+import { User } from '../models/user.model';
+import { Permission } from '../models/group.model';
+/* eslint-enable no-unused-vars */
 
 interface GroupAttributes {
     id: string;
@@ -8,7 +10,7 @@ interface GroupAttributes {
     permissions: Permission[];
 }
 // Some fields are optional when calling UserModel.create() or UserModel.build()
-interface GroupCreationAttributes extends Optional<GroupAttributes, "id"> {}
+interface GroupCreationAttributes extends Optional<GroupAttributes, 'id'> {}
 interface GroupExtended {
     // getUsers: HasManyGetAssociationsMixin<typeof User>; // Note the null assertions!
     // addUser: HasManyAddAssociationMixin<typeof User, number>;

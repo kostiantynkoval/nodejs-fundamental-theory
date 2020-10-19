@@ -1,17 +1,17 @@
-import express from "express";
-import { getAllGroups, createGroup, getGroupById, updateGroup, deleteGroup } from "../models/group.model";
-import { groupSchema } from "../services/validation";
+import express from 'express';
+import { getAllGroups, createGroup, getGroupById, updateGroup, deleteGroup } from '../models/group.model';
+import { groupSchema } from '../services/validation';
 
 const groupRouter: express.Router = express.Router();
 
 // Get all groups
-groupRouter.get('/', async ( req, res) => {
+groupRouter.get('/', async (req, res) => {
     try {
         // Filter users by string, sort, and return limited items
         const groups = await getAllGroups();
         res.json(groups);
-    } catch ( error ) {
-        console.log("Error during fetching groups", error);
+    } catch (error) {
+        console.log('Error during fetching groups', error);
     }
 });
 
@@ -23,9 +23,9 @@ groupRouter.post('/create', async (req, res) => {
         try {
             await createGroup(value);
             res.json({ message: 'Group has been created successfully' });
-        } catch ( error ) {
-            console.log("Error during creating a group: ", error)
-            res.status(500).json({ error });
+        } catch (err) {
+            console.log('Error during creating a group: ', err);
+            res.status(500).json({ err });
         }
     } else {
         res.status(400).json({ error });
@@ -33,66 +33,64 @@ groupRouter.post('/create', async (req, res) => {
 });
 
 groupRouter
-.route('/:id')
-// Get group by id
-.get(async (req, res) => {
-    try {
-        const group = getGroupById(req.params.id);
-        if (!group) {
-            res.status(404).json({ message: 'Group is not found' });
+    .route('/:id')
+    // Get group by id
+    .get(async (req, res) => {
+        try {
+            const group = getGroupById(req.params.id);
+            if (!group) {
+                res.status(404).json({ message: 'Group is not found' });
+            } else {
+                res.json(group);
+            }
+        } catch (error) {
+            console.log('Error during fetching a group: ', error);
+            res.status(500).json({ error });
+        }
+    })
+    // Update item by id
+    .put(async (req, res) => {
+        if (Object.keys(req.body).length > 0) {
+            try {
+                await updateGroup(req.body, req.params.id);
+                res.json({ message: 'Group has been updated successfully' });
+            } catch (e) {
+                if (e.original.code === '23505') {
+                    return res.status(400).json({ error: { message: `Bad request: ${ e.errors[0].message }` } });
+                }
+                return res.status(500).json({ error: e });
+            }
         } else {
-            res.json(group);
+            return res.status(400).json({ error: { message: 'Bad request: No items to update' } });
         }
-    } catch ( error ) {
-        console.log("Error during fetching a group: ", error)
-        res.status(500).json({ error });
-    }
-})
-// Update item by id
-.put(async (req, res) => {
-    if ( Object.keys(req.body).length > 0) {
+    })
+    // Delete item by id
+    .delete(async (req, res) => {
         try {
-            await updateGroup(req.body, req.params.id);
-            res.json({ message: `Group has been updated successfully` });
-        } catch ( e ) {
-            if (e.original.code === "23505") {
-                return res.status(400).json({ error: { message: "Bad request: " + e.errors[0].message } } );
-            } else {
+            await deleteGroup(req.params.id);
+            res.json({ message: 'Group is deleted successfully' });
+        } catch (e) {
+            res.status(500).json({ error: e });
+        }
+    })
+    // Add users to a group
+    .post(async (req, res) => {
+        const { userIds }: { userIds: string[]} = req.body;
+        if (userIds.length > 0) {
+            try {
+                console.log('userIds', userIds);
+                const group = await getGroupById(req.params.id);
+                await group?.addUsers(userIds);
+                res.json({ message: 'Users added successfully' });
+            } catch (e) {
+                if (e.original.code === '23505') {
+                    return res.status(400).json({ error: { message: `Bad request: ${ e.errors[0].message }` } });
+                }
                 return res.status(500).json({ error: e });
             }
+        } else {
+            return res.status(400).json({ error: { message: 'Bad request: No items to update' } });
         }
-    } else {
-        return res.status(400).json({ error: { message: "Bad request: No items to update" } } );
-    }
-})
-// Delete item by id
-.delete(async (req, res) => {
-    try {
-        await deleteGroup(req.params.id);
-        res.json({ message: 'Group is deleted successfully' });
-    } catch ( e ) {
-        res.status(500).json({ error: e });
-    }
-})
-// Add users to a group
-.post(async (req, res) => {
-    const { userIds }: { userIds: string[]} = req.body;
-    if ( userIds.length > 0) {
-        try {
-            console.log("userIds", userIds)
-            const group = await getGroupById(req.params.id);
-            await group?.addUsers(userIds);
-            res.json ({ message: 'Users added successfully' });
-        } catch ( e ) {
-            if (e.original.code === "23505") {
-                return res.status(400).json({ error: { message: "Bad request: " + e.errors[0].message } } );
-            } else {
-                return res.status(500).json({ error: e });
-            }
-        }
-    } else {
-        return res.status(400).json({ error: { message: "Bad request: No items to update" } } );
-    }
-})
+    });
 
 module.exports = groupRouter;
