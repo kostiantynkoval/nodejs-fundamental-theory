@@ -8,13 +8,13 @@
   "license": "MIT",
   "scripts": {
     "start": "nodemon src/index.ts",
-    "build": "npx babel-node src --out-dir build --extensions '.ts,.js'",
-    "lint": "eslint . --ext .ts"
+    "build": "npx babel src --out-dir build --extensions '.ts,.js'",
+    "lint": "eslint . --ext .ts",
+    "start:build": "node --experimental-modules build/index.js",
+    "check-types": "tsc"
   },
-  "type": "module",
   "dependencies": {
     "@hapi/joi": "^17.1.1",
-    "csvtojson": "^2.0.10",
     "express": "^4.17.1",
     "express-joi-validation": "^4.0.4-beta.0",
     "sequelize": "^6.3.5",
