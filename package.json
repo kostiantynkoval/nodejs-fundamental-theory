@@ -11,7 +11,7 @@
     "build": "npx babel src --out-dir build --extensions '.ts,.js'",
     "lint": "eslint . --ext .ts",
     "start:build": "node --experimental-modules build/index.js",
-    "check-types": "tsc"
+    "check-types": "tsc --noEmit"
   },
   "dependencies": {
     "@hapi/joi": "^17.1.1",

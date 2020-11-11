@@ -1,5 +1,6 @@
 import express from 'express';
 import { sequelize } from './data-access/db';
+import { logRequest, logError, uncaughtErrorsHandler, finalErrorHandler } from "./middlewares";
 // import { User } from './models/user.model';
 // import { Group } from './models/group.model';
 // import { users, groups } from './mockedData';
@@ -22,13 +23,16 @@ sequelize
     .catch(e => console.log('Error: Can\'t connect to db. ', e));
 
 app.use(express.json());
-app.use((req, res, next) => {
-    console.info(`${req.method} ${req.url}`);
-    console.info('REQ BODY: ', req.body);
-    next();
-});
+app.use(logRequest);
 app.use('/api/users', userRouter);
 app.use('/api/groups', groupRouter);
+app.use(logError);
+app.use(finalErrorHandler);
+
+console.log(process.argv);
+
+process.on('uncaughtException', uncaughtErrorsHandler);
+process.on('unhandledRejection', uncaughtErrorsHandler);
 
 // To create a tables and fill them in with data
 // await Group.sync({ force: true })
