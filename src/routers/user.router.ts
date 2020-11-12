@@ -1,11 +1,12 @@
 import express from 'express';
-import { getAutoSuggestUsers, getAllUsersWithDeleted, getAllUsers, createUser, getUserById, updateUser, deleteUser } from '../models/user.model';
-import { userSchema, userUpdateSchema } from '../services/validation';
+import { getAutoSuggestUsers, getAllUsersWithDeleted, getAllUsers, createUser, getUserById, updateUser, deleteUser, loginUser } from '../models/user.model';
+import { userSchema, userLoginSchema, userUpdateSchema } from '../services/validation';
+import { isUserAuthorized } from "../middlewares";
 
 const userRouter: express.Router = express.Router();
 
 // Get all not deleted users
-userRouter.get('/', async (req, res) => {
+userRouter.get('/', isUserAuthorized,  async (req, res) => {
     try {
         // Filter users by string, sort, and return limited items
         if (!!req.query.search || !!req.query.limit) {
@@ -21,12 +22,12 @@ userRouter.get('/', async (req, res) => {
             res.json(users);
         }
     } catch (error) {
-        console.log('Error during fetching users', error);
+        res.json({error: 'Error during fetching users'});
     }
 });
 
 // Create new user
-userRouter.post('/create', async (req, res) => {
+userRouter.post('/create', isUserAuthorized, async (req, res) => {
     const { error, value } = userSchema.validate(req.body);
     // Body validation
     if (!error) {
@@ -41,10 +42,29 @@ userRouter.post('/create', async (req, res) => {
     }
 });
 
+// Login
+userRouter.post('/login', async (req, res) => {
+    const { error, value } = userLoginSchema.validate(req.body);
+    // Body validation
+    if (!error) {
+        try {
+            const { error, token } = await loginUser(value);
+            if (error) {
+                res.status(404).json({ success: false, message: error });
+            }
+            res.json({ success: true, token });
+        } catch (e) {
+            res.status(500).json({ error: e });
+        }
+    } else {
+        res.status(400).json({ error });
+    }
+});
+
 userRouter
     .route('/:id')
     // Get item by id
-    .get(async (req, res) => {
+    .get(isUserAuthorized, async (req, res) => {
         try {
             const user = await getUserById(req.params.id);
             if (!user) {
@@ -58,7 +78,7 @@ userRouter
         }
     })
     // Update item by id
-    .put(async (req, res) => {
+    .put(isUserAuthorized, async (req, res) => {
         const { error, value } = userUpdateSchema.validate(req.body);
         if (!error) {
             try {
@@ -75,7 +95,7 @@ userRouter
         }
     })
     // Delete item by id
-    .delete(async (req, res) => {
+    .delete(isUserAuthorized, async (req, res) => {
         try {
             await deleteUser(req.params.id);
             res.json({ message: 'User is deleted successfully' });

@@ -1,9 +1,11 @@
 import { DataTypes, Op, UUIDV4 } from 'sequelize';
+import { v4 as uuidv4 } from 'uuid';
+import jwt from 'jsonwebtoken';
 import { sequelize } from '../data-access/db';
 import { Group } from './group.model';
+import { SECRET } from "../mockedData";
 // eslint-disable-next-line no-unused-vars
 import { UserModel } from '../types';
-import { v4 as uuidv4 } from 'uuid';
 
 export const User = sequelize.define<UserModel>('User', {
     id: {
@@ -106,3 +108,22 @@ export const deleteUser = async (id: string) => await User.update({ isDeleted: t
         id
     }
 });
+
+// Login
+export const loginUser = async ( { login, password }: { login: string, password: string } ) => {
+    const user = await User.findOne({
+        where: {
+            login,
+            password
+        }
+    });
+    if (!user) {
+        return {error: "False credentials"}
+    }
+    const payload = {
+        id: user.id,
+        login: user.login,
+        age: user.age
+    }
+    return { token: jwt.sign(payload, SECRET, { expiresIn: 300 }) }
+}

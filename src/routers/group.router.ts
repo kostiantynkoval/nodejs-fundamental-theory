@@ -28,9 +28,7 @@ groupRouter.post('/create', async (req, res) => {
             res.status(500).json({ err });
         }
     } else {
-        // FIXME: remove throwing error
-        throw new Error(error.message)
-        // res.status(400).json({ error });
+        res.status(400).json({ error });
     }
 });
 

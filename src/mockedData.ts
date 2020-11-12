@@ -1,3 +1,5 @@
+export const SECRET = "^G/~h5l:En*S]S=*flL/H0&]qr!>6Az2:BOpOznie#g8]T5~16";
+
 export const groups = [
     {
         'name': 'Guests',
