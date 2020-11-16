@@ -1,9 +1,10 @@
 import { DataTypes, Op, UUIDV4 } from 'sequelize';
 import { v4 as uuidv4 } from 'uuid';
 import jwt from 'jsonwebtoken';
+import bcrypt from 'bcrypt';
 import { sequelize } from '../data-access/db';
 import { Group } from './group.model';
-import { SECRET } from "../mockedData";
+import { SECRET, saltRounds } from "../mockedData";
 // eslint-disable-next-line no-unused-vars
 import { UserModel } from '../types';
 
@@ -86,21 +87,38 @@ export const getUserById = async (id: string) => await User.findOne({
 
 // Create new user
 // TODO: Write function to hash password and save hash to db, not the password itself
-export const createUser = async ({ login, password, age }: { login: string, password: string, age: number }) => await User.create({
-    id: uuidv4(),
-    login,
-    password,
-    age,
-    isDeleted: false
-});
+export const createUser = async ({ login, password, age }: { login: string, password: string, age: number }) => {
+    try {
+        const hashedPassword = await bcrypt.hash(password, saltRounds);
+        return await User.create({
+            id: uuidv4(),
+            login,
+            password: hashedPassword,
+            age,
+            isDeleted: false
+        });
+    } catch ( e ) {
+        throw e;
+    }
+}
 
 // Update user
 // TODO: Write function to hash password and save hash to db, not the password itself
-export const updateUser = async (value: {login: string, password: string, age: number, isDeleted: boolean}, id: string) => await User.update(value, {
-    where: {
-        id
+export const updateUser = async (value: {login: string, password: string, age: number, isDeleted: boolean}, id: string) => {
+    try {
+        const hashedPassword = await bcrypt.hash(value.password, saltRounds);
+        return await User.update({
+            ...value,
+            password: hashedPassword,
+        }, {
+            where: {
+                id
+            }
+        });
+    } catch ( e ) {
+        throw e;
     }
-});
+}
 
 // Delete user (mark isDelete field as true, not delete user from the db)
 export const deleteUser = async (id: string) => await User.update({ isDeleted: true }, {
@@ -113,17 +131,20 @@ export const deleteUser = async (id: string) => await User.update({ isDeleted: t
 export const loginUser = async ( { login, password }: { login: string, password: string } ) => {
     const user = await User.findOne({
         where: {
-            login,
-            password
+            login
         }
     });
     if (!user) {
-        return {error: "False credentials"}
+        return { error: "User doesn't exist" }
     }
-    const payload = {
-        id: user.id,
-        login: user.login,
-        age: user.age
+    const isValid = await bcrypt.compare(password, user.password);
+    if (isValid) {
+        const payload = {
+            id: user.id,
+            login: user.login,
+            age: user.age
+        }
+        return { token: jwt.sign(payload, SECRET, { expiresIn: 3000 }) }
     }
-    return { token: jwt.sign(payload, SECRET, { expiresIn: 300 }) }
+    return { error: "False credentials" }
 }

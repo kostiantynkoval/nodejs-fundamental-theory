@@ -85,7 +85,7 @@ userRouter
                 await updateUser(value, req.params.id);
                 res.json({ message: `User: ${ value.login } is updated successfully` });
             } catch (e) {
-                if (e.original.code === '23505') {
+                if (e.original && e.original.code === '23505') {
                     return res.status(400).json({ error: { message: `Bad request: ${ e.errors[0].message }` } });
                 }
                 return res.status(500).json({ error: e });

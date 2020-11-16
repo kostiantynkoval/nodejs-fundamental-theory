@@ -1,5 +1,6 @@
 import express from 'express';
 import { sequelize } from './data-access/db';
+import cors from 'cors';
 import { logRequest, logError, uncaughtErrorsHandler, finalErrorHandler } from "./middlewares";
 // import { User } from './models/user.model';
 // import { Group } from './models/group.model';
@@ -22,6 +23,7 @@ sequelize
     })
     .catch(e => console.log('Error: Can\'t connect to db. ', e));
 
+app.use(cors());
 app.use(express.json());
 app.use(logRequest);
 app.use('/api/users', userRouter);
