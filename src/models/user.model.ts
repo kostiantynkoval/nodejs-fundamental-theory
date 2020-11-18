@@ -1,10 +1,10 @@
 import { DataTypes, Op, UUIDV4 } from 'sequelize';
 import { v4 as uuidv4 } from 'uuid';
-import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import { sequelize } from '../data-access/db';
 import { Group } from './group.model';
-import { SECRET, saltRounds } from "../mockedData";
+import { saltRounds } from '../mockedData';
+import { updateTokens } from '../middlewares';
 // eslint-disable-next-line no-unused-vars
 import { UserModel } from '../types';
 
@@ -97,10 +97,10 @@ export const createUser = async ({ login, password, age }: { login: string, pass
             age,
             isDeleted: false
         });
-    } catch ( e ) {
+    } catch (e) {
         throw e;
     }
-}
+};
 
 // Update user
 // TODO: Write function to hash password and save hash to db, not the password itself
@@ -109,16 +109,16 @@ export const updateUser = async (value: {login: string, password: string, age: n
         const hashedPassword = await bcrypt.hash(value.password, saltRounds);
         return await User.update({
             ...value,
-            password: hashedPassword,
+            password: hashedPassword
         }, {
             where: {
                 id
             }
         });
-    } catch ( e ) {
+    } catch (e) {
         throw e;
     }
-}
+};
 
 // Delete user (mark isDelete field as true, not delete user from the db)
 export const deleteUser = async (id: string) => await User.update({ isDeleted: true }, {
@@ -128,23 +128,27 @@ export const deleteUser = async (id: string) => await User.update({ isDeleted: t
 });
 
 // Login
-export const loginUser = async ( { login, password }: { login: string, password: string } ) => {
-    const user = await User.findOne({
-        where: {
-            login
+export const loginUser = async ({ login, password }: { login: string, password: string }) => {
+    try {
+        const user = await User.findOne({
+            where: {
+                login
+            }
+        });
+        if (!user) {
+            throw new Error("Can't find such user");
         }
-    });
-    if (!user) {
-        return { error: "User doesn't exist" }
-    }
-    const isValid = await bcrypt.compare(password, user.password);
-    if (isValid) {
-        const payload = {
-            id: user.id,
-            login: user.login,
-            age: user.age
+        const isValid = await bcrypt.compare(password, user.password);
+        if (isValid) {
+            const payload = {
+                id: user.id,
+                login: user.login,
+                age: user.age
+            };
+            return updateTokens(payload);
         }
-        return { token: jwt.sign(payload, SECRET, { expiresIn: 3000 }) }
+        throw new Error('Invalid credentials');
+    } catch (e) {
+        throw e;
     }
-    return { error: "False credentials" }
-}
+};

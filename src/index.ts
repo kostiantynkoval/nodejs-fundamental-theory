@@ -1,13 +1,15 @@
 import express from 'express';
 import { sequelize } from './data-access/db';
 import cors from 'cors';
-import { logRequest, logError, uncaughtErrorsHandler, finalErrorHandler } from "./middlewares";
+import { logRequest, logError, uncaughtErrorsHandler, finalErrorHandler } from './middlewares';
 // import { User } from './models/user.model';
 // import { Group } from './models/group.model';
+// import { Token } from './models/token.model';
 // import { users, groups } from './mockedData';
 
 const userRouter = require('./routers/user.router');
 const groupRouter = require('./routers/group.router');
+const authRouter = require('./routers/auth.router');
 const app: express.Application = express();
 
 sequelize
@@ -26,6 +28,7 @@ sequelize
 app.use(cors());
 app.use(express.json());
 app.use(logRequest);
+app.use('/api/auth', authRouter);
 app.use('/api/users', userRouter);
 app.use('/api/groups', groupRouter);
 app.use(logError);

@@ -1,7 +1,7 @@
 import express from 'express';
-import { getAutoSuggestUsers, getAllUsersWithDeleted, getAllUsers, createUser, getUserById, updateUser, deleteUser, loginUser } from '../models/user.model';
-import { userSchema, userLoginSchema, userUpdateSchema } from '../services/validation';
-import { isUserAuthorized } from "../middlewares";
+import { getAutoSuggestUsers, getAllUsersWithDeleted, getAllUsers, createUser, getUserById, updateUser, deleteUser } from '../models/user.model';
+import { userSchema, userUpdateSchema } from '../services/validation';
+import { isUserAuthorized } from '../middlewares';
 
 const userRouter: express.Router = express.Router();
 
@@ -22,7 +22,7 @@ userRouter.get('/', isUserAuthorized,  async (req, res) => {
             res.json(users);
         }
     } catch (error) {
-        res.json({error: 'Error during fetching users'});
+        res.json({ error: 'Error during fetching users' });
     }
 });
 
@@ -34,25 +34,6 @@ userRouter.post('/create', isUserAuthorized, async (req, res) => {
         try {
             await createUser(value);
             res.json({ message: 'User created successfully' });
-        } catch (e) {
-            res.status(500).json({ error: e });
-        }
-    } else {
-        res.status(400).json({ error });
-    }
-});
-
-// Login
-userRouter.post('/login', async (req, res) => {
-    const { error, value } = userLoginSchema.validate(req.body);
-    // Body validation
-    if (!error) {
-        try {
-            const { error, token } = await loginUser(value);
-            if (error) {
-                res.status(404).json({ success: false, message: error });
-            }
-            res.json({ success: true, token });
         } catch (e) {
             res.status(500).json({ error: e });
         }

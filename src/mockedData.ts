@@ -1,6 +1,18 @@
 export const saltRounds = 10;
 
-export const SECRET = "^G/~h5l:En*S]S=*flL/H0&]qr!>6Az2:BOpOznie#g8]T5~16";
+export const JWT = {
+    secret: '^G/~h5l:En*S]S=*flL/H0&]qr!>6Az2:BOpOznie#g8]T5~16',
+    tokens: {
+        access: {
+            type: 'access',
+            expiresIn: 30
+        },
+        refresh: {
+            type: 'refresh',
+            expiresIn: 30000
+        }
+    }
+};
 
 export const groups = [
     {
