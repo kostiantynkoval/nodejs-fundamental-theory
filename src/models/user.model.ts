@@ -42,7 +42,7 @@ Group.belongsToMany(User, { through: 'UserGroup', onDelete: 'CASCADE', onUpdate:
 // Functions manipulate Model's data
 
 // Get users filtered by login and/or limited
-export const getAutoSuggestUsers = async (loginSubstring: string | undefined, limit:  string | undefined) => await User.findAll({
+export const getAutoSuggestUsers = async (loginSubstring?: string, limit?:  string) => await User.findAll({
     ...loginSubstring && {
         where: {
             [Op.and]: {

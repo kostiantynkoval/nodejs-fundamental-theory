@@ -10,8 +10,7 @@ userRouter.get('/', isUserAuthorized,  async (req, res) => {
     try {
         // Filter users by string, sort, and return limited items
         if (!!req.query.search || !!req.query.limit) {
-            // FIXME: Didn't find another way how to convert ParsedQs to string | undefined
-            const users = await getAutoSuggestUsers(req.query.search as string | undefined, req.query.limit as string | undefined);
+            const users = await getAutoSuggestUsers(req.query.search as string, req.query.limit as string);
             res.json(users);
             // Show all users with deleted ones if there is query: showDeleted=true
         } else if (req.query.showDeleted === 'true') {
