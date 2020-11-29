@@ -39,7 +39,7 @@ export const Group = sequelize.define<GroupModel>('Group', {
 export const getAllGroups = async () => await Group.findAll({ include: User });
 
 // Get group by id
-export const getGroupById = async (id: string) => await Group.findOne({
+export const fetchGroupById = async (id: string) => await Group.findOne({
     where: {
         id
     },

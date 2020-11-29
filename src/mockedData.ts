@@ -5,7 +5,7 @@ export const JWT = {
     tokens: {
         access: {
             type: 'access',
-            expiresIn: 30
+            expiresIn: 300
         },
         refresh: {
             type: 'refresh',

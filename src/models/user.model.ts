@@ -79,7 +79,7 @@ export const getAllUsers = async () => await User.findAll({
 });
 
 // Get user by id
-export const getUserById = async (id: string) => await User.findOne({
+export const fetchUserById = async (id: string) => await User.findOne({
     where: {
         id
     }
