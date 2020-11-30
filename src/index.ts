@@ -1,6 +1,6 @@
 import { sequelize } from './data-access/db';
 import { uncaughtErrorsHandler } from './middlewares';
-import { app } from "./app";
+import { app } from './app';
 
 sequelize
     .sync()
