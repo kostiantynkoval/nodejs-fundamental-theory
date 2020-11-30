@@ -1,4 +1,5 @@
 .idea
+.env
 node_modules
 homework1/result_task1_2.txt
 homework1/result_stream_task1_2.txt

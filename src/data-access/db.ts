@@ -1,12 +1,12 @@
 import { Sequelize } from 'sequelize';
 
 export const sequelize = new Sequelize(
-    'deq58cmdf0d86v',
-    'djkmhhnuvliiuu',
-    '441fb6e100db768c59f873967963e3d056fc0bb9a5fe41b219d9fb32b06c021b',
+    process.env.DB_ID,
+    process.env.DB_USERNAME,
+    process.env.DB_PASSWORD,
     {
-        port: 5432,
-        host: 'ec2-176-34-114-78.eu-west-1.compute.amazonaws.com',
+        port: +process.env.DB_PORT,
+        host: process.env.DB_HOST,
         dialect: 'postgres',
         dialectOptions: {
             ssl: {

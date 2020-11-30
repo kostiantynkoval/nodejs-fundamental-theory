@@ -1,15 +1,15 @@
-export const saltRounds = 10;
+export const saltRounds = +process.env.JWT_SALT_ROUNDS;
 
 export const JWT = {
-    secret: '^G/~h5l:En*S]S=*flL/H0&]qr!>6Az2:BOpOznie#g8]T5~16',
+    secret: process.env.JWT_SECRET,
     tokens: {
         access: {
             type: 'access',
-            expiresIn: 300
+            expiresIn: +process.env.JWT_ACCESS_EXPIRES
         },
         refresh: {
             type: 'refresh',
-            expiresIn: 30000
+            expiresIn: +process.env.JWT_REFRESH_EXPIRES
         }
     }
 };

@@ -1,7 +1,7 @@
 import express from 'express';
 import { addUsersToGroup, createNewGroup, deleteGroupById, getGroupById, getGroups, updateGroupById } from '../controllers/groups.controller';
 
-const groupRouter: express.Router = express.Router();
+export const groupRouter: express.Router = express.Router();
 
 // Get all groups
 groupRouter.get('/', getGroups);
@@ -15,5 +15,3 @@ groupRouter
     .put(updateGroupById)
     .delete(deleteGroupById)
     .post(addUsersToGroup);
-
-module.exports = groupRouter;

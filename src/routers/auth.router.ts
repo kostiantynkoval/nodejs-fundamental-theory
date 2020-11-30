@@ -6,7 +6,7 @@ import { Token } from '../models/token.model';
 import { updateTokens } from '../middlewares';
 import express from 'express';
 
-const authRouter: express.Router = express.Router();
+export const authRouter: express.Router = express.Router();
 
 // Login
 authRouter.post('/login', async (req, res) => {
@@ -58,5 +58,3 @@ authRouter.post('/refresh-tokens', async (req, res) => {
         }
     }
 });
-
-module.exports = authRouter;
